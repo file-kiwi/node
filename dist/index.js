@@ -107,11 +107,12 @@ export async function startUpload(webfolder, options = {}) {
             skipChunks.push(uploaded);
         }
     }
-    const uploadPromises = webfolder.files.map(async (meta, i) => {
+    for (let i = 0; i < webfolder.files.length; i++) {
+        const meta = webfolder.files[i];
         if (skipChunks[i] === 'complete') {
             onProgress?.(meta, meta.chunks, meta.chunks);
             onFileComplete?.(meta);
-            return;
+            continue;
         }
         let fileBuffer;
         try {
@@ -121,7 +122,7 @@ export async function startUpload(webfolder, options = {}) {
             const err = new Error(`Cannot read file: ${meta.filepath}`);
             if (onError) {
                 onError(meta, err);
-                return;
+                continue;
             }
             throw err;
         }
@@ -161,8 +162,7 @@ export async function startUpload(webfolder, options = {}) {
         const checkUrl = `${API_BASE}/v1/upload/check/${meta.fid}?webfolderId=${webfolder.webfolderId}&apiAuth=${encodeURIComponent(webfolder.apiAuth)}`;
         await fetch(checkUrl);
         onFileComplete?.(meta);
-    });
-    await Promise.all(uploadPromises);
+    }
 }
 export async function encryptChunk(chunk, secretKey) {
     const plainStream = bufferToStream(chunk);

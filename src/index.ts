@@ -132,11 +132,13 @@ export async function startUpload(webfolder: WebFolder, options: StartUploadOpti
     }
   }
 
-  const uploadPromises = webfolder.files.map(async (meta, i) => {
+  for (let i = 0; i < webfolder.files.length; i++) {
+    const meta = webfolder.files[i];
+
     if (skipChunks[i] === 'complete') {
       onProgress?.(meta, meta.chunks, meta.chunks);
       onFileComplete?.(meta);
-      return;
+      continue;
     }
 
     let fileBuffer: Buffer;
@@ -144,7 +146,7 @@ export async function startUpload(webfolder: WebFolder, options: StartUploadOpti
       fileBuffer = fs.readFileSync(meta.filepath);
     } catch {
       const err = new Error(`Cannot read file: ${meta.filepath}`);
-      if (onError) { onError(meta, err); return; }
+      if (onError) { onError(meta, err); continue; }
       throw err;
     }
     const allChunks = buildChunkOrder(meta.chunks);
@@ -189,9 +191,7 @@ export async function startUpload(webfolder: WebFolder, options: StartUploadOpti
     await fetch(checkUrl);
 
     onFileComplete?.(meta);
-  });
-
-  await Promise.all(uploadPromises);
+  }
 }
 
 export async function encryptChunk(chunk: Buffer | Uint8Array, secretKey: string): Promise<Uint8Array> {
