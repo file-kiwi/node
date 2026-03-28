@@ -34,34 +34,78 @@ interface FileState {
   done: boolean;
 }
 
+// Terminal display width for a string (CJK/fullwidth = 2, others = 1)
+function strWidth(str: string): number {
+  let w = 0;
+  for (const ch of str) {
+    const cp = ch.codePointAt(0) || 0;
+    // CJK Unified, Hangul, Fullwidth, CJK Compatibility, etc.
+    if (
+      (cp >= 0x1100 && cp <= 0x115F) || // Hangul Jamo
+      (cp >= 0x2E80 && cp <= 0x303E) || // CJK Radicals
+      (cp >= 0x3040 && cp <= 0x33BF) || // Hiragana, Katakana, CJK Compatibility
+      (cp >= 0x3400 && cp <= 0x4DBF) || // CJK Unified Extension A
+      (cp >= 0x4E00 && cp <= 0xA4CF) || // CJK Unified + Yi
+      (cp >= 0xAC00 && cp <= 0xD7AF) || // Hangul Syllables
+      (cp >= 0xF900 && cp <= 0xFAFF) || // CJK Compatibility Ideographs
+      (cp >= 0xFE30 && cp <= 0xFE6F) || // CJK Compatibility Forms
+      (cp >= 0xFF01 && cp <= 0xFF60) || // Fullwidth Forms
+      (cp >= 0xFFE0 && cp <= 0xFFE6) || // Fullwidth Signs
+      (cp >= 0x20000 && cp <= 0x2FA1F)  // CJK Extension B+
+    ) {
+      w += 2;
+    } else {
+      w += 1;
+    }
+  }
+  return w;
+}
+
+// Pad string to target display width
+function padEnd(str: string, targetWidth: number): string {
+  const diff = targetWidth - strWidth(str);
+  return diff > 0 ? str + ' '.repeat(diff) : str;
+}
+
+function padStart(str: string, targetWidth: number): string {
+  const diff = targetWidth - strWidth(str);
+  return diff > 0 ? ' '.repeat(diff) + str : str;
+}
+
+function truncName(name: string, maxChars = 100): string {
+  return name.length > maxChars ? name.slice(0, maxChars - 3) + '...' : name;
+}
+
 function calcWidth(fileStates: FileState[]): number {
   let max = 0;
   for (const f of fileStates) {
-    const name = f.name.length > 100 ? f.name.slice(0, 97) + '...' : f.name;
-    const len = name.length + 2 + formatBytes(f.size).length + 2; // spaces around name and size
-    if (len > max) max = len;
+    const name = truncName(f.name);
+    const w = strWidth(name) + 2 + strWidth(formatBytes(f.size)) + 2;
+    if (w > max) max = w;
   }
   return max;
 }
 
 function renderFileLine(f: FileState, width: number): string {
-  const truncName = f.name.length > 100 ? f.name.slice(0, 97) + '...' : f.name;
-  const label = ` ${truncName} `;
-  const sizeStr = ` ${formatBytes(f.size)} `;
-  const totalWidth = Math.max(width, label.length + sizeStr.length);
-  const text = label + sizeStr.padStart(totalWidth - label.length);
-  const dlHours = f.freeDownloadHours ? ` \u274b${f.freeDownloadHours}h` : '';
+  const name = truncName(f.name);
+  const sizeStr = formatBytes(f.size);
+  const nameW = strWidth(name) + 2; // " name "
+  const sizeW = strWidth(sizeStr) + 2; // " size "
+  const totalWidth = Math.max(width, nameW + sizeW);
+  const gap = totalWidth - nameW - sizeW;
+  const text = ` ${name} ${' '.repeat(gap)} ${sizeStr} `;
+  const dlTag = f.freeDownloadHours ? ` [${f.freeDownloadHours}h]` : '';
 
   if (f.done) {
-    return `  \x1b[42;30m${text}\x1b[0m\x1b[32m${dlHours}\x1b[0m`;
+    return `  \x1b[42;30m${text}\x1b[0m\x1b[32m${dlTag}\x1b[0m`;
   }
 
   const filled = Math.round(f.progress * totalWidth);
-  const pct = (f.progress * 100).toFixed(0) + '%';
+  const pct = (f.progress * 100).toFixed(2) + '%';
   const filledText = text.slice(0, filled);
   const unfilledText = text.slice(filled);
 
-  return `  \x1b[44;97m${filledText}\x1b[0m\x1b[7m${unfilledText}\x1b[0m \x1b[2m${pct}${dlHours}\x1b[0m`;
+  return `  \x1b[44;97m${filledText}\x1b[0m\x1b[7m${unfilledText}\x1b[0m \x1b[2m${pct}${dlTag}\x1b[0m`;
 }
 
 function drawProgress(fileStates: FileState[], url: string, retentionHours: number, lineCount: number): number {
@@ -77,7 +121,7 @@ function drawProgress(fileStates: FileState[], url: string, retentionHours: numb
   process.stdout.write(`${CLEAR_LINE}\n`);
   process.stdout.write(`${CLEAR_LINE}  ${url}\n`);
   process.stdout.write(`${CLEAR_LINE}\n`);
-  process.stdout.write(`${CLEAR_LINE}  \x1b[2m\u274b = free download hours left\x1b[0m\n`);
+  process.stdout.write(`${CLEAR_LINE}  \x1b[2m[ ] = free download hours left\x1b[0m\n`);
   process.stdout.write(`${CLEAR_LINE}  \x1b[2mAll files will be deleted from the server after ${retentionHours} hours.\x1b[0m\n`);
   count += 5;
   return count;
