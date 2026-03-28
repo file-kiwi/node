@@ -1,0 +1,39 @@
+{
+  "name": "@file-kiwi/node",
+  "version": "1.0.0",
+  "description": "Node.js library and CLI for uploading E2E encrypted files to file.kiwi",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "filekiwi": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "file-upload",
+    "file-sharing",
+    "filekiwi",
+    "cli",
+    "encrypted-upload",
+    "e2e-encryption"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/file-kiwi/node.git"
+  },
+  "homepage": "https://file.kiwi/api",
+  "license": "MIT",
+  "dependencies": {
+    "wormhole-crypto": "^0.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.4.0"
+  }
+}
