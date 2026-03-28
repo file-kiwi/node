@@ -21,8 +21,19 @@ const CLEAR_LINE = `${ESC}[2K`;
 const MOVE_UP = (n) => `${ESC}[${n}A`;
 const HIDE_CURSOR = `${ESC}[?25l`;
 const SHOW_CURSOR = `${ESC}[?25h`;
-function renderFileLine(f, width = 40) {
-    const label = ` ${f.name} `;
+function calcWidth(fileStates) {
+    let max = 0;
+    for (const f of fileStates) {
+        const name = f.name.length > 100 ? f.name.slice(0, 97) + '...' : f.name;
+        const len = name.length + 2 + formatBytes(f.size).length + 2; // spaces around name and size
+        if (len > max)
+            max = len;
+    }
+    return max;
+}
+function renderFileLine(f, width) {
+    const truncName = f.name.length > 100 ? f.name.slice(0, 97) + '...' : f.name;
+    const label = ` ${truncName} `;
     const sizeStr = ` ${formatBytes(f.size)} `;
     const totalWidth = Math.max(width, label.length + sizeStr.length);
     const text = label + sizeStr.padStart(totalWidth - label.length);
@@ -40,9 +51,10 @@ function drawProgress(fileStates, url, retentionHours, lineCount) {
     if (lineCount > 0) {
         process.stdout.write(MOVE_UP(lineCount));
     }
+    const width = calcWidth(fileStates);
     let count = 0;
     for (const f of fileStates) {
-        process.stdout.write(`${CLEAR_LINE}${renderFileLine(f)}\n`);
+        process.stdout.write(`${CLEAR_LINE}${renderFileLine(f, width)}\n`);
         count += 1;
     }
     process.stdout.write(`${CLEAR_LINE}\n`);
