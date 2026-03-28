@@ -14,13 +14,20 @@ npm install @file-kiwi/node
 
 ```bash
 # Upload files
-npx filekiwi file1.txt file2.pdf image.png
+npx @file-kiwi/node file1.txt file2.pdf image.png
 
 # With a custom title
-npx filekiwi --title "Project assets" *.zip
+npx @file-kiwi/node --title "Project assets" file1.zip file2.zip
 
 # Resume an interrupted upload
-npx filekiwi --resume <webfolderId>
+npx @file-kiwi/node --resume <webfolderId>
+```
+
+Or install globally to use the short command:
+
+```bash
+npm install -g @file-kiwi/node
+filekiwi file1.txt file2.pdf
 ```
 
 The CLI prints the shareable URL immediately and shows real-time upload progress for each file.
