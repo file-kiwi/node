@@ -39,7 +39,7 @@ function renderFileLine(f: FileState, width = 40): string {
   const sizeStr = ` ${formatBytes(f.size)} `;
   const totalWidth = Math.max(width, label.length + sizeStr.length);
   const text = label + sizeStr.padStart(totalWidth - label.length);
-  const dlHours = f.freeDownloadHours ? ` \u23f3${f.freeDownloadHours}h` : '';
+  const dlHours = f.freeDownloadHours ? ` \u274b${f.freeDownloadHours}h` : '';
 
   if (f.done) {
     return `  \x1b[42;30m${text}\x1b[0m\x1b[32m${dlHours}\x1b[0m`;
@@ -65,7 +65,7 @@ function drawProgress(fileStates: FileState[], url: string, retentionHours: numb
   process.stdout.write(`${CLEAR_LINE}\n`);
   process.stdout.write(`${CLEAR_LINE}  ${url}\n`);
   process.stdout.write(`${CLEAR_LINE}\n`);
-  process.stdout.write(`${CLEAR_LINE}  \x1b[2m\u23f3 = free download hours left\x1b[0m\n`);
+  process.stdout.write(`${CLEAR_LINE}  \x1b[2m\u274b = free download hours left\x1b[0m\n`);
   process.stdout.write(`${CLEAR_LINE}  \x1b[2mAll files will be deleted from the server after ${retentionHours} hours.\x1b[0m\n`);
   count += 5;
   return count;
