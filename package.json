@@ -1,6 +1,6 @@
 {
   "name": "@file-kiwi/node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node.js library and CLI for uploading E2E encrypted files to file.kiwi",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

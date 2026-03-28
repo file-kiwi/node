@@ -162,25 +162,6 @@ Encrypts and uploads all files in the webfolder.
 
 ---
 
-### `encryptChunk(chunk, secretKey)`
-
-Encrypts a single chunk. Useful for custom upload implementations.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `chunk` | `Buffer \| Uint8Array` | Raw chunk data |
-| `secretKey` | `string` | `webfolder.secretKey` (base64url) |
-
-**Returns:** `Promise<Uint8Array>`
-
----
-
-### `generateKeys()`
-
-Generates encryption keys for custom implementations.
-
-**Returns:** `Promise<{ secretKey, ske, encryptFilename(name) }>`
-
 ## License
 
 MIT
