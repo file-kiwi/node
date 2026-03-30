@@ -83,7 +83,7 @@ function calcWidth(fileStates: FileState[]): number {
     const w = strWidth(name) + 2 + strWidth(formatBytes(f.size)) + 2;
     if (w > max) max = w;
   }
-  return max;
+  return Math.max(max, 30);
 }
 
 function renderFileLine(f: FileState, width: number): string {
@@ -120,10 +120,11 @@ function drawProgress(fileStates: FileState[], url: string, retentionHours: numb
   }
   process.stdout.write(`${CLEAR_LINE}\n`);
   process.stdout.write(`${CLEAR_LINE}  ${url}\n`);
+  process.stdout.write(`${CLEAR_LINE}  \x1b[2mYou can share this link even while uploading.\x1b[0m\n`);
   process.stdout.write(`${CLEAR_LINE}\n`);
   process.stdout.write(`${CLEAR_LINE}  \x1b[2m[ ] = free download hours left\x1b[0m\n`);
   process.stdout.write(`${CLEAR_LINE}  \x1b[2mAll files will be deleted from the server after ${retentionHours} hours.\x1b[0m\n`);
-  count += 5;
+  count += 6;
   return count;
 }
 
@@ -213,7 +214,7 @@ async function main() {
 
     process.stdout.write(SHOW_CURSOR);
     fs.unlinkSync(tmp);
-    console.log(`\n  Done. Resume complete.\n`);
+    console.log(`\n  Done. ${webfolder.files.length} file(s) uploaded.\n`);
 
   } else if (filePaths.length > 0) {
     const webfolder = await createWebFolder({
