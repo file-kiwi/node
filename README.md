@@ -12,6 +12,8 @@ npm install @file-kiwi/node
 
 ## CLI Usage
 
+![filekiwi CLI demo](filekiwi.gif)
+
 ```bash
 # Upload files
 npx @file-kiwi/node file1.txt file2.pdf image.png
@@ -31,6 +33,7 @@ filekiwi file1.txt file2.pdf
 ```
 
 The CLI prints the shareable URL immediately and shows real-time upload progress for each file.
+
 
 If the upload is interrupted, a temporary file `filekiwi.tmp.<webfolderId>.json` is left in the current directory. Use `--resume <webfolderId>` to continue from where it stopped.
 
