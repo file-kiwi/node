@@ -51,6 +51,8 @@ echo "Build complete. Download: $(filekiwi dist.tar.gz)" | mail -s "Release v1.2
 
 If the upload is interrupted, a temporary file `filekiwi.tmp.<webfolderId>.json` is left in the current directory. Use `--resume <webfolderId>` to continue from where it stopped.
 
+File size, count, and retention limits apply. See [Limits](https://file.kiwi/api#limits) for details.
+
 ## Library Usage
 
 ### Quick Upload
