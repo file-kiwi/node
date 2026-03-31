@@ -1,6 +1,6 @@
 {
   "name": "@file-kiwi/node",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Node.js library and CLI for uploading E2E encrypted files to file.kiwi",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,6 +30,8 @@
   "homepage": "https://file.kiwi/api",
   "license": "MIT",
   "dependencies": {
+    "qrcode-terminal": "^0.12.0",
+    "uqr": "^0.1.2",
     "wormhole-crypto": "^0.3.1"
   },
   "devDependencies": {

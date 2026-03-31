@@ -34,6 +34,20 @@ filekiwi file1.txt file2.pdf
 
 The CLI prints the shareable URL immediately and shows real-time upload progress for each file.
 
+### Piping
+
+When piped or used in a script, the CLI outputs only the URL to stdout. Progress goes to stderr, so it never breaks the pipeline.
+
+```bash
+# Save URL to a variable
+URL=$(filekiwi report.pdf)
+
+# Copy to clipboard (macOS)
+filekiwi build.zip | pbcopy
+
+# Send download link via email
+echo "Build complete. Download: $(filekiwi dist.tar.gz)" | mail -s "Release v1.2.3" team@example.com
+```
 
 If the upload is interrupted, a temporary file `filekiwi.tmp.<webfolderId>.json` is left in the current directory. Use `--resume <webfolderId>` to continue from where it stopped.
 
