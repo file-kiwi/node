@@ -188,6 +188,12 @@ Encrypts and uploads all files in the webfolder.
 
 ---
 
+## About file.kiwi
+
+file.kiwi is a free file sharing service that lets you share large files online with no size limits and no sign-up. Files are protected with end-to-end encryption, so only you and the recipient can access them. Works in any modern browser across desktop and mobile.
+
+Start [instant file sharing](https://file.kiwi)
+
 ## License
 
 MIT
