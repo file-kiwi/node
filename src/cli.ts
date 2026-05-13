@@ -307,7 +307,7 @@ async function main() {
         },
       });
 
-      fs.unlinkSync(tmp);
+      fs.rmSync(tmp, { force: true });
       process.stderr.write(`Done. ${webfolder.files.length} file(s) uploaded.\n`);
 
     } else {
@@ -341,7 +341,7 @@ async function main() {
       process.stdout.removeListener('resize', redraw);
       clearDrawn();
       process.stdout.write(SHOW_CURSOR);
-      fs.unlinkSync(tmp);
+      fs.rmSync(tmp, { force: true });
       printFinalResult(fileStates, webfolder);
     }
 
@@ -378,7 +378,7 @@ async function main() {
         },
       });
 
-      fs.unlinkSync(tmp);
+      fs.rmSync(tmp, { force: true });
       process.stderr.write(`Done. ${webfolder.files.length} file(s) uploaded.\n`);
 
     } else {
@@ -433,7 +433,7 @@ async function main() {
           process.stdout.removeListener('resize', redraw);
           clearDrawn();
           process.stdout.write(SHOW_CURSOR);
-          fs.unlinkSync(tmp);
+          fs.rmSync(tmp, { force: true });
           console.log('  Stopped.\n');
           process.exit(0);
         }
@@ -455,7 +455,7 @@ async function main() {
         },
       });
 
-      fs.unlinkSync(tmp);
+      fs.rmSync(tmp, { force: true });
       // Upload done — redraw with "Done" message, keep waiting for key input
       redraw();
 

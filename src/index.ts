@@ -141,49 +141,56 @@ export async function startUpload(webfolder: WebFolder, options: StartUploadOpti
       continue;
     }
 
-    let fileBuffer: Buffer;
+    let fileHandle: fs.promises.FileHandle;
     try {
-      fileBuffer = fs.readFileSync(meta.filepath);
-    } catch {
-      const err = new Error(`Cannot read file: ${meta.filepath}`);
+      fileHandle = await fs.promises.open(meta.filepath, 'r');
+    } catch (e) {
+      const err = new Error(`Cannot read file: ${meta.filepath} (${(e as Error).message})`);
       if (onError) { onError(meta, err); continue; }
       throw err;
     }
-    const allChunks = buildChunkOrder(meta.chunks);
 
-    const skip = skipChunks[i] || new Set<number>();
-    const remaining = typeof skip === 'string' ? [] : allChunks.filter((c) => !skip.has(c + 1));
-    let uploaded = typeof skip === 'object' ? skip.size : 0;
+    try {
+      const allChunks = buildChunkOrder(meta.chunks);
 
-    for (const c of remaining) {
-      const start = c * meta.chunkSize;
-      const end = Math.min(start + meta.chunkSize, fileBuffer.length);
-      const plainChunk = fileBuffer.subarray(start, end);
+      const skip = skipChunks[i] || new Set<number>();
+      const remaining = typeof skip === 'string' ? [] : allChunks.filter((c) => !skip.has(c + 1));
+      let uploaded = typeof skip === 'object' ? skip.size : 0;
 
-      const plainStream = bufferToStream(plainChunk);
-      const encryptedStream = await encryptFileStream(plainStream, webfolder.secretKey);
-      const encryptedBlob = new Uint8Array(await new Response(encryptedStream).arrayBuffer());
+      for (const c of remaining) {
+        const start = c * meta.chunkSize;
+        const end = Math.min(start + meta.chunkSize, meta.filesize);
+        const length = end - start;
+        const plainChunk = Buffer.alloc(length);
+        await fileHandle.read(plainChunk, 0, length, start);
 
-      const chunkNum = ('00000' + (c + 1)).slice(-5);
-      const url = `${meta.uploadUrls.head}${meta.uploadUrls.path}/${chunkNum}?${meta.uploadUrls.tail}&X-Amz-Signature=${meta.uploadUrls.signatures[c]}`;
+        const plainStream = bufferToStream(plainChunk);
+        const encryptedStream = await encryptFileStream(plainStream, webfolder.secretKey);
+        const encryptedBlob = new Uint8Array(await new Response(encryptedStream).arrayBuffer());
 
-      const uploadRes = await fetch(url, {
-        method: 'PUT',
-        body: encryptedBlob,
-        headers: {
-          'Content-Length': String(encryptedBlob.length),
-          ...meta.uploadUrls.headers,
-        },
-      });
+        const chunkNum = ('00000' + (c + 1)).slice(-5);
+        const url = `${meta.uploadUrls.head}${meta.uploadUrls.path}/${chunkNum}?${meta.uploadUrls.tail}&X-Amz-Signature=${meta.uploadUrls.signatures[c]}`;
 
-      if (!uploadRes.ok) {
-        const err = new Error(`Upload failed for ${path.basename(meta.filepath)} chunk ${c + 1}: ${uploadRes.status}`);
-        if (onError) { onError(meta, err); return; }
-        throw err;
+        const uploadRes = await fetch(url, {
+          method: 'PUT',
+          body: encryptedBlob,
+          headers: {
+            'Content-Length': String(encryptedBlob.length),
+            ...meta.uploadUrls.headers,
+          },
+        });
+
+        if (!uploadRes.ok) {
+          const err = new Error(`Upload failed for ${path.basename(meta.filepath)} chunk ${c + 1}: ${uploadRes.status}`);
+          if (onError) { onError(meta, err); return; }
+          throw err;
+        }
+
+        uploaded++;
+        onProgress?.(meta, uploaded, meta.chunks);
       }
-
-      uploaded++;
-      onProgress?.(meta, uploaded, meta.chunks);
+    } finally {
+      await fileHandle.close();
     }
 
     // Verify completion
